@@ -102,17 +102,38 @@ Each service communicates via **gRPC**. To add a Korean scenario:
 
 ## Jetson Thor Deployment Notes
 
-- **JetPack version**: 7 (Ubuntu 24.04 LTS, Linux kernel 6.8)
+- **JetPack version**: 7 (Ubuntu 24.04 LTS, Linux kernel 6.8, CUDA 13.0, SM 11.0)
 - **Inference stack**: TensorRT + NVIDIA AI stack
 - **Key flag**: Use `--dtype fp4` for 2,070 TFLOPS mode
 - **Latency target**: ≤100ms per inference step
 - **Memory**: 128GB shared CPU/GPU — no OOM risk with 10B model
 - **Korean output**: Pass `--lang ko` to `run_thor_inference.py`
+- **Python**: 3.12.13 (via uv), venv at `~/alpamayo1.5/a1_5_venv/`
+
+### PyTorch on Thor — Must Build from Source
+
+**PyTorch 2.8.0은 Thor(CUDA 13.0 / SM 11.0 / aarch64)용 공식 바이너리가 없다.**
+반드시 소스에서 빌드해야 한다. 전체 가이드: `docs/thor_pytorch_build.md`
+
+빌드 요약:
+```bash
+git clone --recursive https://github.com/pytorch/pytorch ~/pytorch
+cd ~/pytorch && git checkout v2.8.0
+# CUDA 13.0 호환 패치 적용 (docs/thor_pytorch_build.md 참고)
+USE_TENSORPIPE=0 USE_DISTRIBUTED=0 USE_MPI=0 \
+  TORCH_CUDA_ARCH_LIST="11.0" MAX_JOBS=8 \
+  python setup.py build
+python setup.py develop
+```
+
+빌드 시간: ~6시간 (Thor 단독, MAX_JOBS=8)
 
 ### Known issues on Thor
 - Flash Attention 2 requires nvcc — use `attn_implementation="sdpa"` as fallback if needed
 - First boot model loading takes ~3–4 min (22GB weights)
 - Use `MIG` mode if running parallel experiments
+- **pip list에 torch가 안 보여도** site-packages에 CPU wheel이 숨어있을 수 있음 → `python -c "import torch; print(torch.__file__)"` 로 확인
+- CUDA 13.0은 CUB iterator API를 CCCL로 통합하면서 다수 제거 → PyTorch 2.8.0 소스 패치 필요 (상세 내용: `docs/thor_pytorch_build.md`)
 
 ---
 
