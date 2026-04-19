@@ -1,0 +1,97 @@
+# alpasim_korea.yaml
+# AlpaSim configuration for Korean long-tail driving scenarios
+# Extends base_config.yaml — do not modify base_config.yaml directly
+
+defaults:
+  - base_config          # inherits NVlabs/alpasim default config
+  - driver: alpamayo_configs
+
+# ── Runtime settings ──────────────────────────────────────────────────────
+runtime:
+  simulation_config:
+    # Number of rollouts per scene (increase for statistical significance)
+    n_rollouts: 10
+    # Simulation step size in seconds
+    dt: 0.1
+    # Total simulation horizon (seconds)
+    horizon: 6.4  # matches Alpamayo 1.5 output horizon (64 waypoints × 0.1s)
+
+    cameras:
+      # Front cameras (Alpamayo primary input)
+      - name: front_center
+        width: 1920
+        height: 1080
+        fov: 120
+      - name: front_left
+        width: 1920
+        height: 1080
+        fov: 90
+      - name: front_right
+        width: 1920
+        height: 1080
+        fov: 90
+      # Rear cameras
+      - name: rear_center
+        width: 1920
+        height: 1080
+        fov: 120
+
+    # Vehicle config (representative Korean urban vehicle)
+    vehicle:
+      wheelbase: 2.72          # meters, Hyundai Ioniq 5
+      track_width: 1.60
+      max_steer_angle: 0.52    # radians
+
+# ── Korean scenario registry ──────────────────────────────────────────────
+# Each entry references a scenario YAML in scenarios/korea/
+korea_scenarios:
+
+  - id: horizontal_traffic_light
+    file: scenarios/korea/horizontal_traffic_light.yaml
+    description: "Korean horizontal 3-color traffic light (vs vertical in training data)"
+    priority: high
+    tags: [traffic_light, perception, classification]
+
+  - id: bus_only_lane
+    file: scenarios/korea/bus_only_lane.yaml
+    description: "Dedicated bus lane with intermittent enforcement — ego must reason about legality"
+    priority: high
+    tags: [lane, reasoning, rule_compliance]
+
+  - id: narrow_alleyway
+    file: scenarios/korea/narrow_alleyway.yaml
+    description: "골목길 — sub-3m width alleyway with sudden pedestrians and parked scooters"
+    priority: high
+    tags: [narrow_road, pedestrian, urban]
+
+  - id: reverse_motorcycle
+    file: scenarios/korea/reverse_motorcycle.yaml
+    description: "Motorcycle riding against traffic on narrow one-way street"
+    priority: medium
+    tags: [edge_case, unexpected_agent, safety]
+
+  - id: jaywalking_dense
+    file: scenarios/korea/jaywalking_dense.yaml
+    description: "High-density crosswalk with jaywalkers ignoring red signal"
+    priority: high
+    tags: [pedestrian, edge_case, safety_critical]
+
+# ── Evaluation settings ───────────────────────────────────────────────────
+evaluation:
+  metrics:
+    - l2_displacement_error        # trajectory accuracy
+    - collision_rate               # safety
+    - time_to_collision_min        # safety margin
+    - reasoning_coherence_score    # Korean reasoning trace quality (custom)
+    - scenario_completion_rate     # did ego complete the scenario safely?
+
+  output_dir: evaluation/results/
+  save_videos: true
+  video_fps: 10
+
+# ── Korean language output ────────────────────────────────────────────────
+language:
+  reasoning_language: ko          # output reasoning traces in Korean
+  reasoning_prompt_template: |
+    현재 주행 상황을 분석하고, 결정한 행동과 그 이유를 한국어로 설명하세요.
+    형식: {"상황": "...", "판단": "...", "행동": "...", "안전근거": "..."}

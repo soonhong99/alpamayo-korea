@@ -1,0 +1,72 @@
+# finetune_config.yaml
+# Fine-tuning hyperparameters for Alpamayo-Korea
+# Following NVIDIA Cosmos Cookbook RL post-training recipes
+
+model:
+  base: nvidia/Alpamayo-1.5-10B
+  backbone: nvidia/Cosmos-Reason2-8B
+  output_dir: checkpoints/alpamayo_korea_v1/
+
+training:
+  method: rl_post_training          # RL-based fine-tuning (GRPO/PPO variant)
+  total_steps: 10000
+  batch_size: 4                     # per GPU; reduce to 2 if OOM on RTX 3090
+  gradient_accumulation_steps: 8
+  learning_rate: 1.0e-5
+  lr_scheduler: cosine
+  warmup_steps: 500
+  max_grad_norm: 1.0
+  dtype: bf16
+  seed: 42
+
+  # Scenario-weighted sampling — oversample rare Korean edge cases
+  scenario_weights:
+    horizontal_traffic_light: 2.0   # 2x oversample (highest baseline failure rate)
+    bus_only_lane: 1.5
+    narrow_alleyway: 2.0
+    reverse_motorcycle: 3.0         # rarest; needs most coverage
+    jaywalking_dense: 1.5
+
+reward:
+  # AlpaSim closed-loop reward components
+  trajectory_l2_weight: 1.0
+  collision_penalty: -10.0
+  scenario_completion_bonus: 5.0
+  reasoning_coherence_weight: 0.5   # reward for Korean reasoning quality
+
+  # Korean reasoning reward: does trace mention the key scenario feature?
+  reasoning_keywords:
+    horizontal_traffic_light: ["가로형", "수평", "신호등", "정지"]
+    bus_only_lane: ["버스전용", "차선", "위반", "합법"]
+    narrow_alleyway: ["골목", "좁은", "보행자", "서행"]
+    reverse_motorcycle: ["역주행", "오토바이", "충돌위험", "회피"]
+    jaywalking_dense: ["무단횡단", "보행자", "감속", "안전거리"]
+
+data:
+  # Datasets used for fine-tuning (must be downloaded first)
+  sources:
+    - path: data/aihub/
+      weight: 1.5                   # primary Korean perception data
+      format: aihub_coco
+    - path: data/kakao/
+      weight: 1.0
+      format: kakao_lidar_camera
+    - path: data/42dot/
+      weight: 0.8
+      format: 42dot_multicam
+
+  # AlpaSim scenario rollouts (generated during training)
+  alpasim_rollouts:
+    enabled: true
+    rollouts_per_step: 4
+    scenario_config: configs/alpasim_korea.yaml
+
+checkpointing:
+  save_every_steps: 500
+  keep_last_n: 3
+  evaluate_every_steps: 1000
+
+logging:
+  log_dir: logs/finetune/
+  wandb_project: alpamayo-korea      # set WANDB_API_KEY env var to enable
+  log_every_steps: 10

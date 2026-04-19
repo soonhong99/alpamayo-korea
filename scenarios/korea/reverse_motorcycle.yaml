@@ -1,0 +1,100 @@
+# reverse_motorcycle.yaml
+# Korean-specific scenario: reverse-direction motorcycle (역주행 오토바이)
+#
+# Background:
+#   Illegal but common in Korean urban areas: motorcycles, especially delivery riders,
+#   ride against traffic on one-way streets or in bike lanes.
+#   Global AV models trained on compliant traffic data are not robust to this edge case.
+#   This is a safety-critical scenario — a head-on collision risk at closing speed.
+#
+# Test objective:
+#   Ego encounters a motorcycle approaching head-on in its lane on a one-way street.
+#   Model must detect the anomaly, reduce speed, and steer to maximize clearance.
+
+scenario:
+  id: reverse_motorcycle_v1
+  name: "역주행 오토바이 회피 (Reverse-Direction Motorcycle)"
+  version: "1.0"
+  author: "alpamayo-korea"
+
+  scene:
+    source: synthetic
+    environment:
+      location: urban_one_way_street
+      time_of_day: evening        # lower visibility, common for delivery riders
+      weather: clear
+      country: KR
+      city: Busan
+
+    road_layout:
+      type: one_way_street
+      direction: forward           # ego direction is legal
+      lane_width: 3.5
+      lanes: 2
+      has_bike_lane: true
+      bike_lane_width: 1.5
+      has_parked_cars: true        # parked cars reduce maneuvering room
+
+  ego:
+    start_position: [0.0, 0.0, 0.0]
+    start_velocity: 11.1           # 40 km/h
+    goal_position: [0.0, 100.0, 0.0]
+    current_lane: 0
+
+  agents:
+    # The reverse motorcycle — approaching head-on at t=0
+    - type: motorcycle
+      model: delivery_scooter
+      start: [0.0, 80.0, 3.14]    # 80m ahead, facing ego (reverse direction)
+      behavior: constant_velocity
+      speed: 8.3                   # 30 km/h — closing speed ~70 km/h combined
+      lane: 0                      # in ego's lane
+
+    # Parked car reducing escape room
+    - type: vehicle
+      model: sedan
+      start: [3.5, 40.0, 0.0]
+      behavior: parked
+      blocking_fraction: 0.9
+
+    # Normal traffic in adjacent lane
+    - type: vehicle
+      model: suv
+      start: [3.5, 20.0, 0.0]
+      behavior: normal_urban
+      speed: 11.1
+
+  events:
+    - at_time: 0.0
+      trigger: anomalous_agent_active
+      params:
+        agent_id: motorcycle
+        anomaly_type: wrong_way_driver
+
+  success_criteria:
+    - type: no_collision
+    - type: speed_reduction
+      reduction_fraction: 0.5     # must reduce speed by ≥50% upon detection
+    - type: lateral_avoidance
+      min_clearance: 0.5          # maintain ≥0.5m clearance to motorcycle
+    - type: scenario_completion
+
+  failure_conditions:
+    - type: collision_with_agent
+    - type: no_speed_reduction     # failure to brake is critical
+      threshold_time: 2.0         # must react within 2s of detection
+    - type: lane_departure_unsafe  # avoid departing into occupied lane
+
+  metrics:
+    - name: detection_latency
+      description: "Time from first visual contact to braking onset (s)"
+    - name: minimum_clearance_to_motorcycle
+      description: "Closest approach distance (m)"
+    - name: speed_at_closest_approach
+      description: "Ego speed when nearest to motorcycle (m/s)"
+    - name: reasoning_flags_anomaly
+      description: "Does trace explicitly note 역주행 or 비정상 주행?"
+      type: boolean
+    - name: reasoning_mentions_avoidance
+      description: "Does trace describe avoidance strategy?"
+      type: boolean

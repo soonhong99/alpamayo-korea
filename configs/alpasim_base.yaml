@@ -1,0 +1,63 @@
+# alpasim_base.yaml
+# AlpaSim baseline configuration — DO NOT MODIFY DIRECTLY
+# Extend this via alpasim_korea.yaml using Hydra defaults
+
+runtime:
+  simulation_config:
+    n_rollouts: 5
+    dt: 0.1
+    horizon: 6.4
+
+    cameras:
+      - name: front_center
+        width: 1920
+        height: 1080
+        fov: 120
+      - name: front_left
+        width: 1920
+        height: 1080
+        fov: 90
+      - name: front_right
+        width: 1920
+        height: 1080
+        fov: 90
+      - name: rear_center
+        width: 1920
+        height: 1080
+        fov: 120
+      - name: rear_left
+        width: 1920
+        height: 1080
+        fov: 90
+      - name: rear_right
+        width: 1920
+        height: 1080
+        fov: 90
+      - name: front_fisheye
+        width: 1920
+        height: 1080
+        fov: 180
+
+    vehicle:
+      wheelbase: 2.79
+      track_width: 1.62
+      max_steer_angle: 0.52
+
+driver:
+  model_id: nvidia/Alpamayo-1.5-10B
+  dtype: bf16
+  attn_implementation: flash_attn2
+  device: cuda
+
+evaluation:
+  metrics:
+    - l2_displacement_error
+    - collision_rate
+    - time_to_collision_min
+    - scenario_completion_rate
+  output_dir: evaluation/results/
+  save_videos: false
+  video_fps: 10
+
+language:
+  reasoning_language: en

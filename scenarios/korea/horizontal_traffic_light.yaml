@@ -1,0 +1,97 @@
+# horizontal_traffic_light.yaml
+# Korean-specific scenario: horizontal traffic light perception
+#
+# Background:
+#   In Korea, traffic lights are predominantly HORIZONTAL (3 lights in a row)
+#   while global training data (US, EU) predominantly features VERTICAL lights.
+#   This causes Alpamayo to misclassify or delay recognition in Korean urban settings.
+#
+# Test objective:
+#   Measure how quickly and accurately the model detects and acts on
+#   a horizontal red light at a busy urban intersection.
+
+scenario:
+  id: horizontal_traffic_light_v1
+  name: "한국형 가로 신호등 교차로 (Korean Horizontal Traffic Light)"
+  version: "1.0"
+  author: "alpamayo-korea"
+
+  # ── Scene definition ──────────────────────────────────────────────────
+  scene:
+    # Use a Korean scene if available from AI Hub / AlpaSim NuRec
+    # Fallback: synthetic generation with Cosmos Transfer 2.5
+    source: synthetic
+    environment:
+      location: urban_intersection
+      time_of_day: daytime        # start with easiest condition
+      weather: clear
+      country: KR
+      city: Seoul
+
+    road_layout:
+      type: 4_way_intersection
+      lane_width: 3.5             # meters (Korean standard)
+      lanes_per_direction: 2
+      has_pedestrian_crossing: true
+      has_turn_signals: true      # separate arrow signals (Korean standard)
+
+    traffic_light:
+      orientation: horizontal     # KEY DIFFERENCE from training data
+      color_sequence: [green, yellow, red]
+      pole_height: 5.5            # meters
+      placement: overhead_gantry  # common in Korean major roads
+
+  # ── Ego vehicle ───────────────────────────────────────────────────────
+  ego:
+    start_position: [0.0, -30.0, 0.0]   # 30m before intersection
+    start_velocity: 11.1                  # 40 km/h in m/s
+    goal_position: [0.0, 30.0, 0.0]     # through intersection
+
+  # ── Traffic agents ────────────────────────────────────────────────────
+  agents:
+    - type: vehicle
+      model: sedan
+      start: [-20.0, 0.0, 1.57]  # approaching from left
+      behavior: normal_urban
+
+    - type: pedestrian
+      start: [-5.0, 2.0, 0.0]
+      behavior: waiting_at_crosswalk
+
+    - type: pedestrian
+      start: [5.0, 2.0, 3.14]
+      behavior: waiting_at_crosswalk
+
+  # ── Trigger events ────────────────────────────────────────────────────
+  events:
+    - at_time: 2.0               # seconds after start
+      trigger: set_traffic_light
+      params:
+        state: red
+        duration: 8.0
+
+  # ── Success criteria ──────────────────────────────────────────────────
+  success_criteria:
+    - type: stop_before_line
+      stop_line_position: [0.0, -3.0, 0.0]
+      tolerance: 2.0              # must stop within 2m of line
+    - type: no_collision
+    - type: reaction_time_max
+      max_seconds: 1.5            # model must react within 1.5s of light change
+
+  # ── Failure conditions ────────────────────────────────────────────────
+  failure_conditions:
+    - type: run_red_light
+    - type: collision_with_agent
+    - type: stop_beyond_line
+      max_overshoot: 1.0          # meters
+
+  # ── Metrics captured ──────────────────────────────────────────────────
+  metrics:
+    - name: red_light_detection_latency
+      description: "Time from light turning red to braking onset (seconds)"
+    - name: stop_accuracy
+      description: "Distance from ideal stop position (meters)"
+    - name: reasoning_mentions_horizontal
+      description: "Does Korean reasoning trace mention 가로형/수평 신호등?"
+      type: boolean

@@ -1,0 +1,91 @@
+# bus_only_lane.yaml
+# Korean-specific scenario: bus-only lane rule reasoning
+#
+# Background:
+#   Korean cities use dedicated bus-only lanes (버스전용차로) on major arterials.
+#   Enforcement is time-based (e.g., 07:00–21:00 on weekdays) and location-based.
+#   Global AV models lack the rule-lookup + reasoning needed to navigate this correctly.
+#
+# Test objective:
+#   Ego must decide whether to merge into the bus-only lane to avoid obstruction
+#   and output a reasoning trace explaining the legal basis for its decision.
+
+scenario:
+  id: bus_only_lane_v1
+  name: "버스전용차로 합법성 추론 (Bus-Only Lane Compliance)"
+  version: "1.0"
+  author: "alpamayo-korea"
+
+  scene:
+    source: synthetic
+    environment:
+      location: urban_arterial
+      time_of_day: morning_peak   # 08:00 — enforcement active
+      weather: clear
+      country: KR
+      city: Seoul
+
+    road_layout:
+      type: multi_lane_road
+      total_lanes: 4
+      lane_width: 3.5
+      bus_only_lane:
+        lane_index: 0             # rightmost lane
+        enforcement_hours: "07:00-21:00"
+        enforcement_days: [Mon, Tue, Wed, Thu, Fri]
+        signage: overhead_gantry  # 버스전용차로 표지
+      has_bus_stop: true
+      bus_stop_position: [0.0, 50.0, 0.0]
+
+  ego:
+    start_position: [0.0, 0.0, 0.0]
+    start_velocity: 13.9          # 50 km/h
+    goal_position: [0.0, 150.0, 0.0]
+    current_lane: 1               # second lane from right
+
+  agents:
+    - type: bus
+      model: city_bus
+      start: [-3.5, 30.0, 0.0]   # in bus-only lane, decelerating for stop
+      behavior: decelerate_to_bus_stop
+
+    - type: vehicle
+      model: sedan
+      start: [0.0, 20.0, 0.0]    # in ego's lane, blocking
+      behavior: double_parked     # partially blocking lane 1
+
+    - type: vehicle
+      model: suv
+      start: [3.5, 15.0, 0.0]    # lane 2 (left of ego)
+      behavior: normal_urban
+
+  events:
+    - at_time: 3.0
+      trigger: obstacle_block
+      params:
+        agent_id: sedan
+        block_fraction: 0.7       # 70% of lane blocked
+
+  success_criteria:
+    - type: no_collision
+    - type: maintain_legal_lane   # must NOT enter bus-only lane during enforcement hours
+    - type: scenario_completion
+      max_time: 20.0
+    - type: reasoning_quality
+      required_keywords: ["버스전용", "시간", "위반"]
+
+  failure_conditions:
+    - type: enter_bus_only_lane   # illegal entry during enforcement hours
+    - type: collision_with_agent
+    - type: timeout
+      seconds: 25.0
+
+  metrics:
+    - name: lane_legality_compliance
+      description: "Did ego avoid bus-only lane during enforcement hours? (bool)"
+      type: boolean
+    - name: merge_decision_latency
+      description: "Time from obstruction detection to lane change decision (s)"
+    - name: reasoning_mentions_enforcement
+      description: "Does trace mention 버스전용차로 시간 제한?"
+      type: boolean

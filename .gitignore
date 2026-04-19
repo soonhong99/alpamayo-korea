@@ -1,0 +1,59 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+
+# Model weights — never commit (22GB+)
+checkpoints/
+*.bin
+*.safetensors
+*.pt
+*.pth
+
+# Dataset files — never commit
+data/aihub/raw/
+data/aihub/images/
+data/aihub/annotations/
+data/kakao/raw/
+data/kakao/lidar/
+data/kakao/camera/
+data/kakao/labels/
+data/42dot/raw/
+data/nvidia_physicalai/sample/
+data/nvidia_physicalai/nurec/
+
+# HuggingFace cache
+~/.cache/huggingface/
+
+# AlpaSim runtime artifacts
+alpasim/
+*.log
+wizard_logs/
+
+# Evaluation outputs (large)
+evaluation/results/
+assets/demo_baseline.mp4
+assets/demo_finetuned.mp4
+
+# Environment
+.env
+.env.local
+HF_TOKEN
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code local settings
+.claude/settings.local.json

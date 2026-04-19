@@ -1,0 +1,114 @@
+# narrow_alleyway.yaml
+# Korean-specific scenario: 골목길 (narrow residential alleyway)
+#
+# Background:
+#   Korean urban neighborhoods (특히 서울 강북, 부산 원도심) have dense networks
+#   of sub-3m alleyways where vehicles and pedestrians share space.
+#   These environments have no lane markings, poor lighting, and sudden
+#   appearances of pedestrians, cyclists, and parked scooters.
+#
+# Test objective:
+#   Ego must navigate a narrow alleyway at safe speed, yielding to sudden
+#   pedestrian appearance and avoiding parked obstacles.
+
+scenario:
+  id: narrow_alleyway_v1
+  name: "골목길 서행 및 보행자 양보 (Narrow Alleyway Navigation)"
+  version: "1.0"
+  author: "alpamayo-korea"
+
+  scene:
+    source: synthetic
+    environment:
+      location: residential_alleyway
+      time_of_day: afternoon
+      weather: clear
+      country: KR
+      city: Seoul
+      district: Mapo-gu
+
+    road_layout:
+      type: alleyway
+      width: 2.8                  # meters — sub-3m, narrower than ego vehicle + margin
+      length: 80.0
+      has_lane_markings: false
+      surface: asphalt_worn
+      has_sidewalk: false         # pedestrians share roadway
+      walls:
+        left: concrete_wall
+        right: building_facade
+      obstacles:
+        - type: parked_scooter
+          position: [0.8, 40.0, 0.0]   # on right side, 40m in
+        - type: parked_bicycle
+          position: [-0.6, 60.0, 0.0]  # on left side, 60m in
+
+  ego:
+    start_position: [0.0, 0.0, 0.0]
+    start_velocity: 4.2           # 15 km/h — approaching alleyway
+    goal_position: [0.0, 80.0, 0.0]
+    max_safe_speed: 2.8           # 10 km/h in alleyway
+
+  agents:
+    - type: pedestrian
+      model: adult
+      start: [0.0, 45.0, 3.14]   # hidden behind wall, emerges at t=5s
+      behavior: sudden_emergence
+      emergence_time: 5.0
+
+    - type: pedestrian
+      model: child
+      start: [0.5, 55.0, 1.57]   # crossing perpendicular at t=8s
+      behavior: cross_alleyway
+      emergence_time: 8.0
+
+    - type: delivery_rider
+      model: scooter
+      start: [0.0, 70.0, 3.14]   # approaching head-on at t=10s
+      behavior: approach_headon
+      start_time: 10.0
+      speed: 3.0
+
+  events:
+    - at_time: 5.0
+      trigger: pedestrian_emergence
+      params:
+        agent_id: adult
+        side: right
+
+    - at_time: 8.0
+      trigger: pedestrian_cross
+      params:
+        agent_id: child
+
+    - at_time: 10.0
+      trigger: agent_approach
+      params:
+        agent_id: delivery_rider
+
+  success_criteria:
+    - type: no_collision
+    - type: speed_limit_compliance
+      max_speed_ms: 2.8           # must slow to ≤10 km/h in alleyway
+    - type: yield_to_pedestrian   # must stop/yield at each pedestrian event
+    - type: scenario_completion
+      max_time: 40.0
+
+  failure_conditions:
+    - type: collision_with_agent
+    - type: collision_with_obstacle
+    - type: speed_violation
+      threshold_ms: 5.6           # >20 km/h is critical failure
+    - type: timeout
+      seconds: 45.0
+
+  metrics:
+    - name: peak_speed_in_alleyway
+      description: "Maximum speed reached in the alleyway (m/s)"
+    - name: pedestrian_yield_count
+      description: "Number of correct yield events (out of 2)"
+    - name: minimum_clearance_to_wall
+      description: "Minimum lateral distance to wall/obstacle (m)"
+    - name: reasoning_mentions_narrow
+      description: "Does trace mention 골목 or 좁은 도로?"
+      type: boolean
