@@ -6,9 +6,40 @@ This file gives AI coding assistants (Claude, Copilot, etc.) the context needed 
 
 ## Project Summary
 
-**Alpamayo-Korea** fine-tunes NVIDIA's Alpamayo 1.5 (a 10B-parameter VLA model for autonomous driving) on Korean road scenarios and deploys it on NVIDIA Jetson AGX Thor for real-time edge inference with Korean-language reasoning traces.
+**★★★ 연구 방향 전환 (2026-05-24 교수님 미팅) ★★★**
 
-The core insight: Alpamayo is trained on global data but Korean road environments have distinct characteristics (horizontal traffic lights, bus-only lanes, narrow alleyways, riding culture) that cause systematic model failures. This project bridges that gap.
+**이전 방향 (폐기)**: Korean fine-tuning, RL post-training, 모델 수정  
+**새 방향 (확정)**: **모델 수정 없이 Async Pipeline + iGPU 메모리 최적화로 Alpamayo throughput 극대화**
+
+핵심 목표:
+- **모델 수정 없이** `cudaMemPrefetchAsync` + CUDA Stream으로 layer prefetch ↔ compute 중첩
+- GPU L2 Persistent Residency로 KV Cache를 L2에 고정 (4.76× DRAM 대비 속도)
+- LM autoregressive decode의 layer-level async pipeline 구현 (EOS 기준 가변 step)
+
+**★ 교수님이 관심있는 핵심 논문 (2026-06-07 피드백 확정)**:
+- **llm.npu (ASPLOS 2025)** — RT-Swap보다 이 논문이 핵심
+- 핵심 원리: **"의존성을 지키면서 각 자원의 유휴 시간(bubble)을 제거하는 스케줄링"**
+  - NPU bubble 37% → 0.7% 달성 (out-of-order subgraph execution)
+  - Thor 매핑: SM compute ↔ DMA prefetch (inter-layer), CPU work ↔ GPU compute (inter-inference)
+- Thor 제약: **단일 SM 풀** → intra-layer SM병렬화(Level 0) ❌, inter-layer DMA-SM 중첩(Level 1) ✅
+- **AI 어시스턴트 주의**: RT-Swap 중심으로 분석하지 말 것. llm.npu bubble elimination이 이 연구의 핵심 프레임.
+
+**★ DRAM 대역폭 측정 결과 (2026-06-09 확정, Thor SM11.0)**:
+- VE 35% / LM Prefill 55% / LM Decode 89% / Flow 88% (각각 LPDDR5X 231 GB/s 기준)
+- Prefill: Layer당 ~79ms, FlashAttention SRAM-bound(39.5%), GEMM DRAM-bound(70%)
+  → Layer prefetch 가능: 여유 BW 140 GB/s, 다음 레이어(~0.84 GB) 10ms에 prefetch 완료 ✅
+- Decode: Step당 79.1ms, GEMV 89% BW 포화, 여유 BW ~25 GB/s
+  → Layer prefetch 불가: 0.84 GB / 25 GB/s = 33ms >> layer 4.4ms ❌ (inter-inference 전략 필요)
+- SM 메트릭: GB10B(SM 11.0)에서 `sm__active_cycles` 미존재 → `smsp__cycles_active.sum / smsp__cycles_elapsed.sum` 사용 (smsp_occupancy, warp 점유율, NOT compute utilization)
+
+**★ 양자화는 이 연구의 범위 밖** — 시스템 스케줄링/파이프라이닝만 다룬다. AI 어시스턴트는 절대 양자화를 제안하거나 언급하지 말 것.
+
+참고 문서: `docs/260524_01_교수님_미팅_연구방향_전환.md`, `docs/2606_1주차/260607_03_llm_npu_to_thor_파이프라인_스케줄링_번역.md`
+
+---
+
+**[구 요약 — 참고용으로 보존]**  
+**Alpamayo-Korea** deployed NVIDIA's Alpamayo 1.5 on Jetson AGX Thor. The original Korean fine-tuning direction has been superseded; system-level optimization is now the focus.
 
 ---
 
@@ -104,8 +135,25 @@ Each service communicates via **gRPC**. To add a Korean scenario:
 
 - **JetPack version**: 7 (Ubuntu 24.04 LTS, Linux kernel 6.8, CUDA 13.0, SM 11.0)
 - **Inference stack**: TensorRT + NVIDIA AI stack
-- **Key flag**: Use `--dtype fp4` for 2,070 TFLOPS mode
-- **Latency target**: ≤100ms per inference step
+- **Key flag**: `--dtype bf16` (기본, 실측 ~4.8s/inference). `--dtype int4` (bitsandbytes NF4, KV cache BF16 유지, 즉시 사용 가능). 진짜 FP4 (2,070 TFLOPS)는 TensorRT-LLM 엔진 변환 필요 — 단순 dtype 플래그 불가 (2026-05-19 확인)
+- **추론 주기 규칙 ★ 절대 고정**: Alpamayo는 **10Hz = 100ms 간격**으로 연속 추론한다.
+  - Alpamayo 존재 이유: long-tail 상황(갑작스러운 보행자, 역주행차 등)에 대한 CoC(Chain of Causation) 인과추론으로 즉각 대응
+  - 0.1초 사이에도 장면이 결정적으로 달라질 수 있음 → **KV Temporal Reuse 실험의 유효 Δt는 100ms 단 하나**
+  - Δt=300/500/1000ms 측정은 학문적 참고용일 뿐 — 실제 시스템에서 1초 전 KV를 재사용하는 것은 시스템 설계 원칙 위반
+  - **AI 어시스턴트 주의**: 실험 설계나 분석 시 "Δt를 늘려도 괜찮다"는 추론을 하지 말 것. NVIDIA가 정한 100ms 기준을 항상 따른다.
+- **Latency target**: 전체 추론(prefill+decode) 기준 — 1단계 ~3,500ms, 최종 99ms
+  - **현재 실측 (sdpa, BF16, N=1)**: 4,838ms = VE 728ms + LM Prefill 1,423ms + Decode 1,818ms (17steps×107ms) + Flow 870ms
+  - **AppendOnlyCache-C 적용 후 (2026-05-31 확정)**: Decode 1,345ms (17steps×79.1ms, warm 기준) → 전체 ≈4,366ms (-9.9%)
+    - decode steady-state: **79.1ms/step** (첫 실행 시 9 step JIT warmup 약 109ms, 이후 79ms)
+    - decode mean (warmup 포함): 81.3ms/step (-24.3% vs DynamicCache)
+    - prefill도 1,981ms로 감소 (-509ms, 원인: pre-alloc page mapping 선처리 효과)
+  - ⚠️ 이전 기록 "6,554ms (prefill 4,487ms + decode 2,067ms)"는 eager+StaticCache 커스텀 경로 수치임 — 전체 파이프라인 기준이 아님
+  - BF16 실질 하한 (L2 재사용 포함): decode 1step 최솟값 **79ms** (22GB 중 일부 L2 hit으로 실효 DRAM 접근 감소)
+  - BF16 이론 하한 (대역폭만): 86ms (22GB÷231GB/s), 17step = 1,462ms
+  - 1단계 (~3,500ms): AppendOnlyCache-C + KV Temporal Reuse (시스템만, BF16)
+  - 2단계 (~1,500ms): Speculative Decoding + Inter-Inference Pipeline
+  - 최종 (99ms): Rolling Trajectory 연속 스트리밍 파이프라인으로 재정의 (단일 추론 99ms는 물리적 불가)
+  - ⚠️ 이전 기록 "≤100ms per inference step"은 오기(誤記) — per step이 아니라 전체 추론 기준임
 - **Memory**: 128GB shared CPU/GPU — no OOM risk with 10B model
 - **Korean output**: Pass `--lang ko` to `run_thor_inference.py`
 - **Python**: 3.12.13 (via uv), venv at `~/alpamayo1.5/a1_5_venv/`
@@ -129,7 +177,29 @@ python setup.py develop
 빌드 시간: ~6시간 (Thor 단독, MAX_JOBS=8)
 
 ### Known issues on Thor
-- Flash Attention 2 requires nvcc — use `attn_implementation="sdpa"` as fallback if needed
+- **KV 캐시 구현 규칙** (2026-05-31 최종 확정):
+  - **결론**: `AppendOnlyCache (force_contiguous)` + sdpa 기본값이 현재 최선. DynamicCache 대비 -24.3% (107ms→81ms/step).
+  - 구현 위치: `scripts/inference/260531_appendonly_cache_exp.py` → `AppendOnlyCache` 클래스
+  - 핵심 원리: DynamicCache 상속(FlashAttn 유지) + pre-alloc 버퍼 + in-place write + `.contiguous()` 출력
+  - **eager 사용 금지**: seq_len=3086에서 LM Prefill이 1,423ms→3,753ms (2.6× 느려짐). 어떤 경로에서도 쓰지 말 것.
+  - **StaticCache 주의 사항 (2026-05-31 업데이트)**:
+    - 구 transformers: StaticCache → float 4D mask → MemEfficientAttn → 2× 느림 (구 기록)
+    - **현재 transformers (Thor 설치본)**: `_update_causal_mask` 삭제됨 → `create_causal_mask` 도입 → StaticCache도 FlashAttn 작동, 102.5ms/step
+    - 그러나 StaticCache는 full [B,H,MAX_LEN,D] 버퍼를 attention에 전달 (유효 토큰 n개 + zeros 포함) → AppendOnlyCache-C(79ms)보다 느림
+    - ⚠️ 구 기록 "sdpa+StaticCache → MemEfficientAttn 2×"는 구 transformers 버전 기준임 — 현재 버전에서는 틀린 정보
+  - **attn 백엔드 3계층**: FlashAttention(최속, attn_mask=None or bool) > MemEfficientAttn(float mask 지원, ~2×) > Math(eager동등, 최저속)
+  - **4종 캐시 비교 요약** (2026-05-31 실측, sdpa, 80step):
+    - AppendOnlyCache-C: **79.1ms/step** (steady-state), 81.3ms (mean) ← 최선
+    - AppendOnlyCache-B (non-contiguous): 100.0ms/step
+    - StaticCache: 102.5ms/step (FlashAttn, 현재 transformers)
+    - DynamicCache: 107.4ms/step ← 종전 기준선
+  - **`_update_causal_mask` 유무**: 현재 Thor transformers에는 이 메서드가 **없음**. monkey-patch 불가. `create_causal_mask` + `sdpa_mask()` 사용.
+- **torch.compile 실험 결과 (2026-05-28 확정): ❌ 비호환**
+  - `reduce-overhead` (Inductor 경로): Triton 3.7.0 ↔ PyTorch 2.8.0 소스 API 연쇄 불일치
+    - `triton_key` 삭제됨, `cluster_dims` 삭제됨 등 근본적 API 재설계
+    - aarch64용 구버전 Triton wheel 없어 다운그레이드 불가
+  - `cudagraphs` 경로: Qwen3VL `_deepstack_process`의 dynamic boolean indexing(`visual_pos_masks`)이 CUDA Graph 캡처와 근본 비호환 → `capture_end()` crash
+  - **결론**: 모델 아키텍처 제약으로 어떤 torch.compile 모드도 작동하지 않음. 재시도 불필요.
 - First boot model loading takes ~3–4 min (22GB weights)
 - Use `MIG` mode if running parallel experiments
 - **pip list에 torch가 안 보여도** site-packages에 CPU wheel이 숨어있을 수 있음 → `python -c "import torch; print(torch.__file__)"` 로 확인
