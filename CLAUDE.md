@@ -34,7 +34,8 @@ This file gives AI coding assistants (Claude, Copilot, etc.) the context needed 
 
 **★ 양자화는 이 연구의 범위 밖** — 시스템 스케줄링/파이프라이닝만 다룬다. AI 어시스턴트는 절대 양자화를 제안하거나 언급하지 말 것.
 
-**★ UMIC 컴파일 엔진 (2026-06-10 착수, `src/umic/`)**:
+**★ UMIC 컴파일 엔진 (2026-06-10 착수) — 전용 repo로 분리됨**:
+- **코드/실험 repo: `https://github.com/soonhong99/umic` (private), 로컬: `C:\Users\nanay\Desktop\umic`** — 컴파일 엔진 빌드·실험은 모두 그쪽에서 진행. 이 repo에는 연구 일지(docs/)만 남김
 - 설계서: `docs/2606_1주차/260610_01_UMIC_iGPU_전용_컴파일엔진_설계서.md` (3계층 IR, measurement-guided compilation, 닫힌 패턴 집합 ~10개)
 - **Triton 3.7.0 직접 `@triton.jit`은 SM 11.0에서 정상 동작** (2026-06-10 확정) — 죽은 건 torch.compile→Inductor 경로뿐. 커스텀 커널은 직접 Triton으로 작성
 - M1 실측 (P5 gate_silu_mul fusion, `umic.integrate.fuse_mlps` — 체크포인트·모델 소스 무수정 forward 교체):
