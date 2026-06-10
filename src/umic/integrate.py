@@ -24,6 +24,11 @@ logger = logging.getLogger(__name__)
 
 _SILU_NAMES = ("silu", "swish")
 
+# Below this row count the motif runs as GEMV (decode, seq=1) where cuBLAS
+# is optimal and the eager intermediates are KB-scale — fusion would only
+# hurt. Regime-aware dispatch, design doc 원칙 2.
+FUSE_MIN_ROWS = 64
+
 
 def _is_p5_mlp(module: nn.Module) -> bool:
     """Structural match for the gate/up/down SiLU MLP motif (pattern P5)."""
@@ -40,6 +45,9 @@ def _fused_mlp_forward(self: nn.Module, x: torch.Tensor) -> torch.Tensor:
     """P5-fused replacement: silu(x@Wg)*(x@Wu) in one kernel, then down."""
     shape = x.shape
     x2d = x.reshape(-1, shape[-1])
+    if x2d.shape[0] < FUSE_MIN_ROWS:
+        h = self.act_fn(self.gate_proj(x)) * self.up_proj(x)
+        return self.down_proj(h)
     # nn.Linear stores weight as [out, in]; the kernel takes [in, out]
     # strides, so .t() is a free view — no copy, weights untouched.
     h = gate_silu_mul(x2d, self.gate_proj.weight.t(), self.up_proj.weight.t())

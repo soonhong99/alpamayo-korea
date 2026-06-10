@@ -34,6 +34,15 @@ This file gives AI coding assistants (Claude, Copilot, etc.) the context needed 
 
 **★ 양자화는 이 연구의 범위 밖** — 시스템 스케줄링/파이프라이닝만 다룬다. AI 어시스턴트는 절대 양자화를 제안하거나 언급하지 말 것.
 
+**★ UMIC 컴파일 엔진 (2026-06-10 착수, `src/umic/`)**:
+- 설계서: `docs/2606_1주차/260610_01_UMIC_iGPU_전용_컴파일엔진_설계서.md` (3계층 IR, measurement-guided compilation, 닫힌 패턴 집합 ~10개)
+- **Triton 3.7.0 직접 `@triton.jit`은 SM 11.0에서 정상 동작** (2026-06-10 확정) — 죽은 건 torch.compile→Inductor 경로뿐. 커스텀 커널은 직접 Triton으로 작성
+- M1 실측 (P5 gate_silu_mul fusion, `umic.integrate.fuse_mlps` — 체크포인트·모델 소스 무수정 forward 교체):
+  **Prefill DRAM 232.0→148.1 GB (−36.2%), wall-clock 1,423→1,030ms (−27.6%)**, VE/Flow/Decode 회귀 없음
+  - P5 단독 예측 −22.6GB를 크게 초과 — L2 경합 완화의 연쇄 효과 (마이크로벤치에 안 보이는 시스템 효과)
+  - decode(seq=1)는 `FUSE_MIN_ROWS=64` 미만 시 eager 디스패치 (GEMV에 fusion은 손해)
+- 모델 버전 불가지론 원칙: 패턴 매칭은 클래스가 아닌 구조(duck-typing) — Alpamayo 2.0 공개 대응 가능해야 함
+
 참고 문서: `docs/260524_01_교수님_미팅_연구방향_전환.md`, `docs/2606_1주차/260607_03_llm_npu_to_thor_파이프라인_스케줄링_번역.md`
 
 ---
