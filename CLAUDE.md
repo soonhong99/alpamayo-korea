@@ -48,7 +48,9 @@ This file gives AI coding assistants (Claude, Copilot, etc.) the context needed 
 1. **측정 전 `sudo jetson_clocks` 필수** — memory-bound 단계(decode GEMV)는 SM 사용률이 낮아 DVFS 거버너가 GPU/EMC 클럭을 안 올림. 같은 코드가 거버너 107ms vs 고정 70-79ms. 10Hz 실시간 배포에도 클럭 고정 전제
 2. **steady-state는 warmup 포함 5+ run 후 판정** — 클럭 고정 상태에서도 run 0→4에 걸쳐 allocator/페이지 워밍으로 모든 stage가 계단식 하락 (VE 427→305ms, decode 102→70ms)
 3. **decode KV는 contiguous가 정답** (클럭 고정 조건). "view가 낫다"는 2026-06-10 기록은 거버너 변수 미통제 상태의 오판으로 철회됨
-- AppendOnlyCache-C 79.1ms/step(2026-05-31)는 클럭 고정 조건에서 재현 확인됨. UMIC 현재 최고: **decode 69.8ms/step (graph+contiguous), 전체 steady 2,481ms** — 단 eager 기준선(4,838ms)은 미고정·2-run 조건이라 공식 비교 전 동일 조건 재측정 필요
+- AppendOnlyCache-C 79.1ms/step(2026-05-31)는 클럭 고정 조건에서 재현 확인됨
+- **공식 벤치마크 (2026-06-11, 동일 조건: 클럭 고정·6-run steady)**: eager 3,846ms vs **UMIC 2,701ms (−29.8%)**, 단계별 VE −42.7% / Prefill −46.1% / Decode 70.0ms/step (−10.5%) / Flow −37.7%
+  - ⚠ 구 기준선 4,838ms는 거버너+cold 조건 — 이 기준 대비 발표한 −48.7% 등은 부풀려진 수치로 철회. 클럭 고정 조건에서 eager DynamicCache decode는 이미 78.2ms/step (cat 비용 미미 — decode 개선 귀속은 융합+CUDA Graph)
 
 참고 문서: `docs/260524_01_교수님_미팅_연구방향_전환.md`, `docs/2606_1주차/260607_03_llm_npu_to_thor_파이프라인_스케줄링_번역.md`
 
