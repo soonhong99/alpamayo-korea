@@ -1,0 +1,8 @@
+# Jetson AGX Thor hardware profile for UMIC (values measurement-confirmed)
+name: "Jetson AGX Thor"
+sm_arch: "11.0"
+dram_bw_gbps: 231.0          # LPDDR5X one-directional read peak
+l2_bytes: 33554432           # 32 MB GPU L2
+l2_persist_max_bytes: 25165824  # conservative cudaAccessPolicyWindow cap; tune on device
+cpu_cores: 12
+kernel_launch_us: 3.0
