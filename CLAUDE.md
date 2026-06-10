@@ -44,6 +44,12 @@ This file gives AI coding assistants (Claude, Copilot, etc.) the context needed 
   - decode(seq=1)는 `FUSE_MIN_ROWS=64` 미만 시 eager 디스패치 (GEMV에 fusion은 손해)
 - 모델 버전 불가지론 원칙: 패턴 매칭은 클래스가 아닌 구조(duck-typing) — Alpamayo 2.0 공개 대응 가능해야 함
 
+**★ 측정 규칙 (2026-06-11 확정, 모든 성능 실험에 적용)**:
+1. **측정 전 `sudo jetson_clocks` 필수** — memory-bound 단계(decode GEMV)는 SM 사용률이 낮아 DVFS 거버너가 GPU/EMC 클럭을 안 올림. 같은 코드가 거버너 107ms vs 고정 70-79ms. 10Hz 실시간 배포에도 클럭 고정 전제
+2. **steady-state는 warmup 포함 5+ run 후 판정** — 클럭 고정 상태에서도 run 0→4에 걸쳐 allocator/페이지 워밍으로 모든 stage가 계단식 하락 (VE 427→305ms, decode 102→70ms)
+3. **decode KV는 contiguous가 정답** (클럭 고정 조건). "view가 낫다"는 2026-06-10 기록은 거버너 변수 미통제 상태의 오판으로 철회됨
+- AppendOnlyCache-C 79.1ms/step(2026-05-31)는 클럭 고정 조건에서 재현 확인됨. UMIC 현재 최고: **decode 69.8ms/step (graph+contiguous), 전체 steady 2,481ms** — 단 eager 기준선(4,838ms)은 미고정·2-run 조건이라 공식 비교 전 동일 조건 재측정 필요
+
 참고 문서: `docs/260524_01_교수님_미팅_연구방향_전환.md`, `docs/2606_1주차/260607_03_llm_npu_to_thor_파이프라인_스케줄링_번역.md`
 
 ---
