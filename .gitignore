@@ -57,3 +57,17 @@ Thumbs.db
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Large profiling results (CSV, sqlite — 1.2GB+)
+profiling_results/
+
+# Personal academic documents
+docs/papers/
+docs/flashdrive_paper.pdf
+docs/flashdrive_text.txt
+
+# NVIDIA proprietary model source (non-commercial license)
+src_alpamayo1_5/
+
+# Garbled filename artifact
+C:*

@@ -44,16 +44,14 @@ mkdir -p "$RESULTS_DIR"
 # ★ SM 메트릭 수정 (2026-06-11 --list-metrics 실측):
 #   sm__active_cycles.sum / gpc__cycles_elapsed.max → GB10B 미존재 → 항상 0
 #   smsp__cycles_active.sum / smsp__cycles_elapsed.sum → GB10B 유일 지원 공식
+# SM 메트릭 제거 — DRAM BW만 측정하면 충분 (SM util은 연구 범위 밖)
 METRICS="lts__d_sectors_fill_sysmem.sum,\
 lts__t_sectors_aperture_sysmem_op_write.sum,\
 lts__t_request_hit_rate.pct,\
-gpu__time_duration.sum,\
-smsp__cycles_active.sum,\
-smsp__cycles_elapsed.sum,\
-sm__throughput.avg.pct_of_peak_sustained_elapsed"
+gpu__time_duration.sum"
 
 echo "================================================================"
-echo "  Flow(ODE) 단계 커널별 instantaneous BW + SM util 측정"
+echo "  Flow(ODE) 단계 커널별 instantaneous BW 측정 (SM 메트릭 제외)"
 echo "  NVTX 필터 전략 (3단계 시도):"
 echo "    1차: FlowODE/FlowStep  (부모/자식 경로)"
 echo "    2차: Measure/run_01/FlowODE (전체 경로)"
