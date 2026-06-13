@@ -1,0 +1,14 @@
+<svg width="100%" viewBox="0 0 680 338" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>down projection은 cuBLAS가 진짜 최적 — L2 벽</title>
+<desc>down 한 번에 옮기는 DRAM. 이론 하한 183MB인데 cuBLAS는 786MB, Triton G4는 815MB로 둘 다 이론의 4.3배. 가중치 100MB와 입력 75MB가 L2 32MB를 초과해 재독이 불가피하다. 525MB GROUP 법칙은 존재하지 않는 shape의 산물이라 철회.</desc>
+<style>text{font-family:Arial,'Malgun Gothic',sans-serif}.th{font-size:14px;font-weight:600}.ts{font-size:12px}</style>
+<text class="ts" x="195" y="66" text-anchor="end" fill="#5F5E5A">L2 캐시</text>
+<rect x="200" y="52" width="15" height="20" rx="2" fill="#D3D1C7" stroke="#5F5E5A" stroke-width="0.6"/><text class="ts" x="222" y="66" fill="#444441">32 MB</text>
+<text class="ts" x="195" y="111" text-anchor="end" fill="#5F5E5A">이론 하한</text>
+<rect x="200" y="97" width="86" height="20" rx="2" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><text class="ts" x="293" y="111" fill="#085041">183 MB</text>
+<text class="ts" x="195" y="156" text-anchor="end" fill="#5F5E5A">cuBLAS nvjet</text>
+<rect x="200" y="142" width="370" height="20" rx="2" fill="#B5D4F4" stroke="#185FA5" stroke-width="0.6"/><text class="ts" x="208" y="156" fill="#042C53">3.26 ms · L2 62%</text><text class="ts" x="577" y="156" fill="#0C447C">786 MB</text>
+<text class="ts" x="195" y="201" text-anchor="end" fill="#5F5E5A">Triton G4</text>
+<rect x="200" y="187" width="383" height="20" rx="2" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="208" y="201" fill="#4A1B0C">3.86 ms · L2 83%</text><text class="ts" x="590" y="201" fill="#712B13">815 MB</text>
+<rect x="55" y="240" width="570" height="76" rx="8" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.8"/><text class="th" x="340" y="265" text-anchor="middle" fill="#633806">가중치 100 + 입력 75 MB &gt; L2 32 MB → 둘 다 재독 불가피 (이론의 4.3×)</text><text class="ts" x="340" y="288" text-anchor="middle" fill="#854F0B">L2 hit는 Triton이 더 높지만(83 vs 62%) cuBLAS가 더 빠름 — nvjet sm110 MMA가 우월</text><text class="ts" x="340" y="306" text-anchor="middle" fill="#854F0B">'525 MB GROUP 법칙'은 가짜 shape(K=11008)의 산물 → 철회. down = cuBLAS가 최적</text>
+</svg>

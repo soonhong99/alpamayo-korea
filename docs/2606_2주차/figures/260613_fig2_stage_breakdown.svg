@@ -1,0 +1,29 @@
+<svg width="100%" viewBox="0 0 680 365" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>eager 대비 UMIC의 단계별 시간 구성과 전체 단축</title>
+<desc>전체 추론 시간이 eager 3846 밀리초에서 UMIC 2701 밀리초로 29.8퍼센트 줄었다. 구간은 Vision Encoder, LM Prefill, LM Decode 19스텝, Flow Matching. 모든 단계가 줄었다.</desc>
+<style>text{font-family:Arial,'Malgun Gothic',sans-serif}.th{font-size:14px;font-weight:600}.ts{font-size:12px}</style>
+<text class="ts" x="120" y="55" text-anchor="end" fill="#5F5E5A">ms</text>
+<line x1="150" y1="55" x2="150" y2="300" stroke="#B4B2A9" stroke-width="1"/>
+<line x1="150" y1="300" x2="560" y2="300" stroke="#B4B2A9" stroke-width="1"/>
+<line x1="146" y1="237.2" x2="150" y2="237.2" stroke="#B4B2A9"/><text class="ts" x="142" y="241" text-anchor="end" fill="#5F5E5A">1,000</text>
+<line x1="146" y1="174.5" x2="150" y2="174.5" stroke="#B4B2A9"/><text class="ts" x="142" y="178" text-anchor="end" fill="#5F5E5A">2,000</text>
+<line x1="146" y1="111.7" x2="150" y2="111.7" stroke="#B4B2A9"/><text class="ts" x="142" y="115" text-anchor="end" fill="#5F5E5A">3,000</text>
+<text class="ts" x="142" y="304" text-anchor="end" fill="#5F5E5A">0</text>
+<rect x="210" y="266.6" width="120" height="33.4" fill="#CECBF6" stroke="#534AB7" stroke-width="0.6"/><text class="ts" x="270" y="287" text-anchor="middle" fill="#26215C">VE 532</text>
+<rect x="210" y="198.1" width="120" height="68.5" fill="#B5D4F4" stroke="#185FA5" stroke-width="0.6"/><text class="ts" x="270" y="236" text-anchor="middle" fill="#042C53">Prefill 1,090</text>
+<rect x="210" y="104.8" width="120" height="93.3" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><text class="ts" x="270" y="155" text-anchor="middle" fill="#04342C">Decode 1,486</text>
+<rect x="210" y="59.5" width="120" height="45.3" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="270" y="86" text-anchor="middle" fill="#4A1B0C">Flow 721</text>
+<text class="th" x="270" y="50" text-anchor="middle" fill="#2C2C2A">3,846 ms</text>
+<text class="ts" x="270" y="318" text-anchor="middle" fill="#5F5E5A">eager</text>
+<rect x="400" y="280.8" width="120" height="19.2" fill="#CECBF6" stroke="#534AB7" stroke-width="0.6"/>
+<rect x="400" y="243.9" width="120" height="36.9" fill="#B5D4F4" stroke="#185FA5" stroke-width="0.6"/><text class="ts" x="460" y="266" text-anchor="middle" fill="#042C53">588</text>
+<rect x="400" y="160.4" width="120" height="83.5" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><text class="ts" x="460" y="206" text-anchor="middle" fill="#04342C">Decode 1,330</text>
+<rect x="400" y="132.2" width="120" height="28.2" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="460" y="150" text-anchor="middle" fill="#4A1B0C">449</text>
+<text class="th" x="460" y="123" text-anchor="middle" fill="#2C2C2A">2,701 ms</text>
+<text class="ts" x="460" y="318" text-anchor="middle" fill="#5F5E5A">UMIC</text>
+<rect x="556" y="150" width="92" height="40" rx="8" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.8"/><text class="th" x="602" y="172" text-anchor="middle" fill="#27500A">−29.8%</text><text class="ts" x="602" y="186" text-anchor="middle" fill="#3B6D11">동일 조건</text>
+<rect x="150" y="340" width="12" height="12" rx="2" fill="#CECBF6" stroke="#534AB7" stroke-width="0.6"/><text class="ts" x="167" y="350" fill="#5F5E5A">VE −42.7%</text>
+<rect x="265" y="340" width="12" height="12" rx="2" fill="#B5D4F4" stroke="#185FA5" stroke-width="0.6"/><text class="ts" x="282" y="350" fill="#5F5E5A">Prefill −46.1%</text>
+<rect x="400" y="340" width="12" height="12" rx="2" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><text class="ts" x="417" y="350" fill="#5F5E5A">Decode −10.5%</text>
+<rect x="528" y="340" width="12" height="12" rx="2" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="545" y="350" fill="#5F5E5A">Flow −37.7%</text>
+</svg>
