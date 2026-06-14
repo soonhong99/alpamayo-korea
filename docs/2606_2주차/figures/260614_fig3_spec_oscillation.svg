@@ -1,0 +1,28 @@
+<svg width="100%" viewBox="0 0 680 270" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>연속 프레임 CoT: sampled는 진동, greedy는 안정 → cross-frame speculative</title>
+<desc>sampled decode는 연속 프레임 CoT가 두 추론(거리유지/공사회피) 사이를 진동해 cross-frame 수락이 평균 2.3배. greedy decode는 f1~f5가 동일해 안정 구간 17배, 평균 13.8배.</desc>
+<style>text{font-family:Arial,'Malgun Gothic',sans-serif}.th{font-size:14px;font-weight:600}.ts{font-size:12px}</style>
+<text class="ts" x="84" y="84" text-anchor="end" fill="#5F5E5A">sampled</text>
+<rect x="92" y="64" width="66" height="38" rx="5" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><text class="th" x="125" y="83" text-anchor="middle" fill="#04342C">f0</text>
+<rect x="167" y="64" width="66" height="38" rx="5" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="th" x="200" y="83" text-anchor="middle" fill="#4A1B0C">f1</text>
+<rect x="242" y="64" width="66" height="38" rx="5" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><text class="th" x="275" y="83" text-anchor="middle" fill="#04342C">f2</text>
+<rect x="317" y="64" width="66" height="38" rx="5" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="th" x="350" y="83" text-anchor="middle" fill="#4A1B0C">f3</text>
+<rect x="392" y="64" width="66" height="38" rx="5" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="th" x="425" y="83" text-anchor="middle" fill="#4A1B0C">f4</text>
+<rect x="467" y="64" width="66" height="38" rx="5" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><text class="th" x="500" y="83" text-anchor="middle" fill="#04342C">f5</text>
+<rect x="545" y="64" width="90" height="38" rx="6" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.6"/><text class="th" x="590" y="83" text-anchor="middle" fill="#444441">평균 2.3×</text>
+<text class="ts" x="92" y="120" fill="#5F5E5A">추론이 매 프레임 뒤집힘(진동) → draft 절반 빗나감</text>
+
+<text class="ts" x="84" y="166" text-anchor="end" fill="#5F5E5A">greedy</text>
+<rect x="92" y="146" width="66" height="38" rx="5" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="th" x="125" y="165" text-anchor="middle" fill="#4A1B0C">f0</text>
+<rect x="167" y="146" width="66" height="38" rx="5" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><text class="th" x="200" y="165" text-anchor="middle" fill="#04342C">f1</text>
+<rect x="242" y="146" width="66" height="38" rx="5" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><text class="th" x="275" y="165" text-anchor="middle" fill="#04342C">f2</text>
+<rect x="317" y="146" width="66" height="38" rx="5" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><text class="th" x="350" y="165" text-anchor="middle" fill="#04342C">f3</text>
+<rect x="392" y="146" width="66" height="38" rx="5" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><text class="th" x="425" y="165" text-anchor="middle" fill="#04342C">f4</text>
+<rect x="467" y="146" width="66" height="38" rx="5" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><text class="th" x="500" y="165" text-anchor="middle" fill="#04342C">f5</text>
+<rect x="545" y="146" width="90" height="38" rx="6" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.6"/><text class="th" x="590" y="165" text-anchor="middle" fill="#27500A">평균 13.8×</text>
+<text class="ts" x="92" y="202" fill="#3B6D11">f1~f5 동일 → 17토큰 CoT 전체를 1 forward로 검증 (17×)</text>
+
+<rect x="92" y="230" width="13" height="13" rx="3" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><text class="ts" x="110" y="240" fill="#5F5E5A">"앞차 거리유지"</text>
+<rect x="240" y="230" width="13" height="13" rx="3" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="258" y="240" fill="#5F5E5A">"공사구간 회피"</text>
+<text class="ts" x="420" y="240" fill="#888780">출력은 검증으로 항상 동일 (무학습)</text>
+</svg>
