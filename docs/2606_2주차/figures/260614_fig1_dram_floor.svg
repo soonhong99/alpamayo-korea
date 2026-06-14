@@ -1,0 +1,35 @@
+<svg width="100%" viewBox="0 0 680 300" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>단계별 DRAM 전송량: eager 대비 UMIC와 물리 하한</title>
+<desc>VE 98에서 51GB(-48%), Prefill 232에서 78GB(-66%), Decode 323에서 약290GB(-11%, 가중치 재독 하한), Flow 122에서 84GB(-31%). 막대는 현재 UMIC, 회색 외곽선은 eager. Decode는 회피 불가능한 가중치 읽기라 거의 못 줄인다.</desc>
+<style>text{font-family:Arial,'Malgun Gothic',sans-serif}.th{font-size:14px;font-weight:600}.ts{font-size:12px}</style>
+<text class="ts" x="124" y="48" text-anchor="end" fill="#5F5E5A">DRAM (GB)</text>
+<line x1="130" y1="52" x2="130" y2="250" stroke="#B4B2A9" stroke-width="1"/>
+<line x1="130" y1="250" x2="560" y2="250" stroke="#B4B2A9"/>
+<line x1="260" y1="52" x2="260" y2="250" stroke="#E5E3DC"/><text class="ts" x="260" y="264" text-anchor="middle" fill="#888780">100</text>
+<line x1="390" y1="52" x2="390" y2="250" stroke="#E5E3DC"/><text class="ts" x="390" y="264" text-anchor="middle" fill="#888780">200</text>
+<line x1="520" y1="52" x2="520" y2="250" stroke="#E5E3DC"/><text class="ts" x="520" y="264" text-anchor="middle" fill="#888780">300</text>
+
+<text class="th" x="124" y="76" text-anchor="end" fill="#2C2C2A">VE</text>
+<rect x="130" y="64" width="127" height="11" fill="none" stroke="#B4B2A9" stroke-width="1" stroke-dasharray="3 2"/>
+<rect x="130" y="76" width="66" height="13" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/>
+<text class="ts" x="262" y="78" fill="#0F6E56">51 GB (98→51, −48%)</text>
+
+<text class="th" x="124" y="116" text-anchor="end" fill="#2C2C2A">Prefill</text>
+<rect x="130" y="104" width="302" height="11" fill="none" stroke="#B4B2A9" stroke-width="1" stroke-dasharray="3 2"/>
+<rect x="130" y="116" width="101" height="13" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/>
+<text class="ts" x="438" y="118" fill="#0F6E56">78 GB (232→78, −66%)</text>
+
+<text class="th" x="124" y="156" text-anchor="end" fill="#2C2C2A">Decode</text>
+<rect x="130" y="144" width="420" height="11" fill="none" stroke="#B4B2A9" stroke-width="1" stroke-dasharray="3 2"/>
+<rect x="130" y="156" width="376" height="13" fill="#FAC775" stroke="#854F0B" stroke-width="0.6"/>
+<text class="ts" x="512" y="158" fill="#854F0B">≈290 · 하한</text>
+
+<text class="th" x="124" y="196" text-anchor="end" fill="#2C2C2A">Flow</text>
+<rect x="130" y="184" width="159" height="11" fill="none" stroke="#B4B2A9" stroke-width="1" stroke-dasharray="3 2"/>
+<rect x="130" y="196" width="109" height="13" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/>
+<text class="ts" x="295" y="198" fill="#0F6E56">84 GB (122→84, −31%)</text>
+
+<rect x="130" y="276" width="11" height="11" fill="none" stroke="#B4B2A9" stroke-dasharray="3 2"/><text class="ts" x="147" y="282" fill="#5F5E5A">eager (전)</text>
+<rect x="232" y="276" width="11" height="11" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><text class="ts" x="249" y="282" fill="#5F5E5A">UMIC (후)</text>
+<rect x="345" y="276" width="11" height="11" fill="#FAC775" stroke="#854F0B" stroke-width="0.6"/><text class="ts" x="362" y="282" fill="#5F5E5A">회피 불가 (하한)</text>
+</svg>
