@@ -1,0 +1,28 @@
+<svg width="100%" viewBox="0 0 680 320" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>Greedy cross-frame speculative decoding 한눈에</title>
+<desc>보통 방식은 단어를 하나씩 17번 모델에 통과시켜 느리다. 우리 방식은 100ms 전 이전 프레임의 추론을 초안으로 써서 모델이 17토큰을 한 번에 검증하고 전부 채택해 1번 만에 끝낸다. 17배 빠르고 출력은 동일하다. greedy 디코딩이라야 프레임마다 추론이 안정돼 초안이 들어맞는다.</desc>
+<style>text{font-family:Arial,'Malgun Gothic',sans-serif}.th{font-size:14px;font-weight:600}.ts{font-size:12px}</style>
+<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#5F5E5A" stroke-width="1.5" stroke-linecap="round"/></marker></defs>
+
+<text class="th" x="40" y="38" fill="#993C1D">보통 방식 — 단어를 하나씩, 17번 모델 통과 (느림)</text>
+<rect x="80" y="52" width="66" height="36" rx="6" fill="#FAECE7" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="113" y="71" text-anchor="middle" fill="#712B13">단어 1</text>
+<line x1="148" y1="70" x2="172" y2="70" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#ar)"/>
+<rect x="174" y="52" width="66" height="36" rx="6" fill="#FAECE7" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="207" y="71" text-anchor="middle" fill="#712B13">단어 2</text>
+<line x1="242" y1="70" x2="266" y2="70" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#ar)"/>
+<rect x="268" y="52" width="66" height="36" rx="6" fill="#FAECE7" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="301" y="71" text-anchor="middle" fill="#712B13">단어 3</text>
+<text class="th" x="356" y="74" fill="#888780">···</text>
+<line x1="372" y1="70" x2="396" y2="70" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#ar)"/>
+<rect x="398" y="52" width="70" height="36" rx="6" fill="#FAECE7" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="433" y="71" text-anchor="middle" fill="#712B13">단어 17</text>
+<text class="ts" x="80" y="108" fill="#5F5E5A">화살표 1번 = 모델 1회 통과(가중치 15GB 읽기) → 총 17회 ≈ 1,330ms</text>
+
+<line x1="40" y1="130" x2="640" y2="130" stroke="#E5E3DC" stroke-width="1"/>
+
+<text class="th" x="40" y="160" fill="#0F6E56">우리 방식 — 이전 프레임 초안을 한 번에 검증 (1번)</text>
+<rect x="56" y="176" width="158" height="58" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.8"/><text class="th" x="135" y="198" text-anchor="middle" fill="#0C447C">이전 프레임의 추론</text><text class="ts" x="135" y="218" text-anchor="middle" fill="#185FA5">= 초안 17토큰 (100ms 전)</text>
+<line x1="216" y1="205" x2="248" y2="205" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#ar)"/>
+<rect x="250" y="176" width="186" height="58" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.8"/><text class="th" x="343" y="198" text-anchor="middle" fill="#085041">모델이 17토큰 동시 검증</text><text class="ts" x="343" y="218" text-anchor="middle" fill="#0F6E56">= 단 1회 통과</text>
+<line x1="438" y1="205" x2="470" y2="205" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#ar)"/>
+<rect x="472" y="176" width="158" height="58" rx="8" fill="#EAF3DE" stroke="#3B6D11" stroke-width="0.8"/><text class="th" x="551" y="198" text-anchor="middle" fill="#27500A">전부 일치 → 채택</text><text class="ts" x="551" y="218" text-anchor="middle" fill="#3B6D11">17토큰 완성</text>
+<text class="th" x="40" y="258" fill="#27500A">1회 ≈ 80ms — 17× 빠르고, 출력은 보통 방식과 비트 단위로 동일</text>
+<text class="ts" x="40" y="280" fill="#888780">※ 전제: greedy 디코딩이라야 프레임마다 추론이 안정돼(같은 문장 재생성) 이전 초안이 들어맞는다.</text>
+</svg>
