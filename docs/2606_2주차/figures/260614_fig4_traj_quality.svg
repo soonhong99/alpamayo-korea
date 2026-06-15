@@ -1,0 +1,23 @@
+<svg width="100%" viewBox="0 0 680 320" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>궤적 품질(minADE6 vs GT): greedy vs sampled, 동적 프레임 정렬</title>
+<desc>8프레임을 동적도 순으로 정렬한 minADE6. greedy 평균 0.460, sampled 0.542. 동적 절반에서 greedy 0.488, sampled 0.673으로 greedy가 더 정확하다.</desc>
+<style>text{font-family:Arial,'Malgun Gothic',sans-serif}.th{font-size:14px;font-weight:600}.ts{font-size:12px}</style>
+<text class="ts" x="44" y="40" text-anchor="end" fill="#5F5E5A">minADE6 (m)</text>
+<line x1="50" y1="44" x2="50" y2="244" stroke="#B4B2A9"/><line x1="50" y1="244" x2="640" y2="244" stroke="#B4B2A9"/>
+<line x1="46" y1="194" x2="50" y2="194" stroke="#B4B2A9"/><text class="ts" x="44" y="198" text-anchor="end" fill="#888780">0.25</text>
+<line x1="46" y1="144" x2="50" y2="144" stroke="#B4B2A9"/><text class="ts" x="44" y="148" text-anchor="end" fill="#888780">0.50</text>
+<line x1="46" y1="94" x2="50" y2="94" stroke="#B4B2A9"/><text class="ts" x="44" y="98" text-anchor="end" fill="#888780">0.75</text>
+<line x1="46" y1="44" x2="50" y2="44" stroke="#B4B2A9"/><text class="ts" x="44" y="48" text-anchor="end" fill="#888780">1.00</text>
+<text class="ts" x="46" y="256" text-anchor="end" fill="#888780">0</text>
+<g><rect x="64" y="175.2" width="26" height="68.8" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><rect x="92" y="106.0" width="26" height="138.0" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="91" y="270" text-anchor="middle" fill="#5F5E5A">2.0</text></g>
+<g><rect x="138" y="191.2" width="26" height="52.8" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><rect x="166" y="106.0" width="26" height="138.0" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="165" y="270" text-anchor="middle" fill="#5F5E5A">11.0</text></g>
+<g><rect x="212" y="172.4" width="26" height="71.6" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><rect x="240" y="175.2" width="26" height="68.8" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="239" y="270" text-anchor="middle" fill="#5F5E5A">3.5</text></g>
+<g><rect x="286" y="47.0" width="26" height="197.0" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><rect x="314" y="50.8" width="26" height="193.2" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="313" y="270" text-anchor="middle" fill="#5F5E5A">5.1</text></g>
+<g><rect x="360" y="137.6" width="26" height="106.4" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><rect x="388" y="58.6" width="26" height="185.4" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="387" y="270" text-anchor="middle" fill="#5F5E5A">5.4</text></g>
+<g><rect x="434" y="81.8" width="26" height="162.2" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><rect x="462" y="219.2" width="26" height="24.8" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="461" y="270" text-anchor="middle" fill="#5F5E5A">8.0</text></g>
+<g><rect x="508" y="226.4" width="26" height="17.6" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><rect x="536" y="226.4" width="26" height="17.6" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="535" y="270" text-anchor="middle" fill="#5F5E5A">9.5</text></g>
+<g><rect x="582" y="184.6" width="26" height="59.4" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><rect x="610" y="143.2" width="26" height="100.8" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="609" y="270" text-anchor="middle" fill="#5F5E5A">6.5</text></g>
+<text class="ts" x="345" y="286" text-anchor="middle" fill="#888780">← 동적(급변) 큼          프레임 t0(s)          동적 작음 →</text>
+<rect x="64" y="298" width="13" height="13" rx="3" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><text class="ts" x="82" y="308" fill="#5F5E5A">greedy (평균 0.460 · 동적 0.488)</text>
+<rect x="340" y="298" width="13" height="13" rx="3" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="358" y="308" fill="#5F5E5A">sampled (평균 0.542 · 동적 0.673)</text>
+</svg>
