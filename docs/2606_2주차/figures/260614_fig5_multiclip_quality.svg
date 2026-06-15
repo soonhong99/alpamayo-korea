@@ -1,0 +1,24 @@
+<svg width="100%" viewBox="0 0 680 290" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>다클립 궤적 품질: 안정 프레임은 동률, 급변 프레임은 sampled 우세</title>
+<desc>12 clips minADE6. 안정 절반은 greedy 1.042 sampled 1.080으로 동률, 동적 절반은 greedy 1.343 sampled 1.102로 sampled가 더 정확하다. 단일 clip 결론이 반전됐다.</desc>
+<style>text{font-family:Arial,'Malgun Gothic',sans-serif}.th{font-size:14px;font-weight:600}.ts{font-size:12px}</style>
+<text class="ts" x="60" y="40" text-anchor="end" fill="#5F5E5A">minADE6 (m)</text>
+<line x1="66" y1="44" x2="66" y2="240" stroke="#B4B2A9"/><line x1="66" y1="240" x2="640" y2="240" stroke="#B4B2A9"/>
+<line x1="62" y1="177.3" x2="66" y2="177.3" stroke="#B4B2A9"/><text class="ts" x="60" y="181" text-anchor="end" fill="#888780">0.5</text>
+<line x1="62" y1="114.7" x2="66" y2="114.7" stroke="#B4B2A9"/><text class="ts" x="60" y="118" text-anchor="end" fill="#888780">1.0</text>
+<line x1="62" y1="52.0" x2="66" y2="52.0" stroke="#B4B2A9"/><text class="ts" x="60" y="56" text-anchor="end" fill="#888780">1.5</text>
+<text class="ts" x="60" y="244" text-anchor="end" fill="#888780">0</text>
+
+<g><rect x="150" y="109.5" width="70" height="130.5" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><text class="ts" x="185" y="103" text-anchor="middle" fill="#0F6E56">1.042</text></g>
+<g><rect x="240" y="104.7" width="70" height="135.3" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="275" y="98" text-anchor="middle" fill="#993C1D">1.080</text></g>
+<text class="th" x="230" y="262" text-anchor="middle" fill="#2C2C2A">안정 프레임 (6)</text>
+<text class="ts" x="230" y="278" text-anchor="middle" fill="#888780">동률</text>
+
+<g><rect x="400" y="71.8" width="70" height="168.2" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><text class="ts" x="435" y="65" text-anchor="middle" fill="#0F6E56">1.343</text></g>
+<g><rect x="490" y="101.9" width="70" height="138.1" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="525" y="95" text-anchor="middle" fill="#993C1D">1.102</text></g>
+<text class="th" x="480" y="262" text-anchor="middle" fill="#2C2C2A">급변 프레임 (6)</text>
+<text class="ts" x="480" y="278" text-anchor="middle" fill="#993C1D">sampled 우세 (낮을수록 정확)</text>
+
+<rect x="150" y="20" width="13" height="13" rx="3" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.6"/><text class="ts" x="168" y="30" fill="#5F5E5A">greedy (16× 빠름)</text>
+<rect x="340" y="20" width="13" height="13" rx="3" fill="#F5C4B3" stroke="#993C1D" stroke-width="0.6"/><text class="ts" x="358" y="30" fill="#5F5E5A">sampled (배포 기본)</text>
+</svg>
