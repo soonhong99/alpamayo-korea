@@ -69,10 +69,10 @@ $$\alpha \;\approx\; 1-\frac{d}{N},\qquad d=\text{edit}(y^{(f-1)},y^{(f)}).$$
 $$\text{speedup}(d)\;\approx\;\frac{1}{1-\alpha}\;=\;\frac{N}{d}\quad(\text{stable, } \gamma\ge N).$$
 
 $d\to0$(장면 안정)이면 speedup→$\infty$(실제론 forward 1회로 하한), $d$가 크면(급변) speedup→1(=baseline,
-fallback). 측정한 **corr$(d,\;$1st-block 수락$)=-0.72$**와 재사용 비율 100%→84%→12%(편집거리 0/1–3/≥4)가
+fallback). 측정한 **corr$(d,\;$1st-block 수락$)=-0.72$** 와 재사용 비율 100%→84%→12%(편집거리 0/1–3/≥4)가
 이 단조 관계를 뒷받침한다(`260616_02`).
 
-**$d$가 작은 이유 = 시스템 구조.** 제어 주기 $\Delta t=100$ ms에서 장면(따라서 인과추론 CoT)이 거의
+**$d$가 작은 이유 = 시스템 구조.**  제어 주기 $\Delta t=100$ ms에서 장면(따라서 인과추론 CoT)이 거의
 안 변한다. 즉 $\mathbb{E}[d]$는 $\Delta t$의 증가함수이고, 고정 저주기 embodied agent는 구조적으로
 $\mathbb{E}[d]\!\approx\!0$ → $\alpha\!\approx\!1$ → 큰 speedup. **이 항(temporal coherence prior)이 generic
 speculative엔 없는 우리 모델링의 핵심.**
@@ -90,7 +90,8 @@ speculative엔 없는 우리 모델링의 핵심.**
 speculative 수락률로 정식화). FastDriveCoT(구조축)·MMSpec(문맥축)과 직교.
 
 ### 다음 (이론 강화 후보)
-- $\alpha\approx1-d/N$ 회귀로 계수 추정 + $\text{speedup}(d)$ 예측 곡선 vs 실측 overlay 그림.
+- ✅ **검증 완료**: $\text{speedup}\approx N/d$ 가 실측과 **R²=0.99**(안정 구간 R²=1.00), $\alpha\approx1-d/N$
+  corr 0.92 — `260616_06`. 상관(r=−0.72) → 적합된 예측 모델로 승격.
 - $\Delta t$ sweep으로 $\mathbb{E}[d](\Delta t)$ 실측(분석용, 배포 100 ms 고정).
 - TOST 등가성 검정으로 §1 잔차(부동소수점 동점)의 궤적 무영향 정량화.
 
