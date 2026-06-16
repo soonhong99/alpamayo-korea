@@ -42,8 +42,9 @@ draft 길이 $\gamma$일 때, 채택 prefix 길이 $A=\min\{k:\text{불일치}\}
 
 $$\mathbb{E}[\text{tokens per forward}] \;=\; \frac{1-\alpha^{\gamma+1}}{1-\alpha}.$$
 
-**핵심(우리 고유 조건).** draft가 **공짜**다 — 별도 draft 모델 실행 비용이 없다(직전 프레임 출력 재사용).
-따라서 일반 speculative의 "draft 비용" 항이 사라지고, 위 기대값이 **그대로 속도이득**이 된다:
+**핵심(우리 고유 조건).** draft 생성 비용이 **0이다(zero draft cost)** — 별도 draft 모델의 forward가 필요
+없다(직전 프레임 출력을 재사용). 따라서 일반 speculative의 draft 비용 항이 소거되고, 위 기대값이
+**그대로 속도이득**이 된다:
 
 $$\boxed{\;\text{speedup} \;=\; \frac{1-\alpha^{\gamma+1}}{1-\alpha}\;}\qquad
 \xrightarrow[\;\gamma \ge N\;]{}\qquad \frac{1}{1-\alpha}.$$
@@ -52,8 +53,8 @@ CoT 전체를 draft가 덮으면($\gamma\ge N$) 상한은 $1/(1-\alpha)$. 예: $
 실측 안정 프레임 16×와 일치. 평균 $\alpha$가 낮은 혼합에서 평균 10.8×.
 
 > draft 모델을 쓰는 일반 speculative는 $\text{speedup}=\dfrac{1-\alpha^{\gamma+1}}{(1-\alpha)(1+\gamma c)}$
-> ($c$=draft/target 비용비)로 $c$에 깎인다. 우리는 $c=0$이라 이 페널티가 없다 — 이것이 "공짜 시간 draft"의
-> 수식상 이점이다.
+> ($c$=draft/target 비용비)로 $c$에 깎인다. 우리는 $c=0$이라 이 페널티가 없다 — 이것이 무비용 시간 draft
+> (zero-cost temporal draft)의 수식상 이점이다.
 
 ---
 
@@ -83,7 +84,7 @@ speculative엔 없는 우리 모델링의 핵심.**
 
 1. **무손실 정리**: 출력 = greedy(동일 forward). 잔차는 부동소수점 동점뿐.
 2. **가속 공식**: $\text{speedup}=\dfrac{1-\alpha^{\gamma+1}}{1-\alpha}\xrightarrow{\gamma\ge N}\dfrac{1}{1-\alpha}$,
-   공짜 draft라 draft 비용항 0.
+   draft 생성 비용 0(zero draft cost)이므로 draft 비용항 소거.
 3. **시간 일관성 모델**: $\alpha\approx1-d/N$, $\mathbb{E}[d]$는 $\Delta t$의 증가함수 → 저주기에서 $\alpha\to1$.
 
 → 측정(16×, 10.8×, $r=-0.72$)을 이론에 못 박고, **③이 우리만의 기여**(embodied 추론의 시간 일관성을
